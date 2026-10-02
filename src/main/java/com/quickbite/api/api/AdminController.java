@@ -5,6 +5,7 @@ import com.quickbite.api.api.dto.ApiMapper;
 import com.quickbite.api.api.dto.OrderSummaryResponse;
 import com.quickbite.api.api.dto.PageResponse;
 import com.quickbite.api.api.dto.RestaurantResponse;
+import com.quickbite.api.api.dto.RestaurantOwnerAccessRequest;
 import com.quickbite.api.api.dto.UserResponse;
 import com.quickbite.api.entity.OrderStatus;
 import com.quickbite.api.service.AdminService;
@@ -16,6 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +49,12 @@ public class AdminController {
     public PageResponse<UserResponse> users(@RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         return PageResponse.from(userService.searchUsers(search, pageable), apiMapper::toResponse);
+    }
+
+    @PatchMapping("/users/{id}/restaurant-owner")
+    public UserResponse setRestaurantOwner(@PathVariable Long id,
+            @Valid @RequestBody RestaurantOwnerAccessRequest request) {
+        return apiMapper.toResponse(userService.setRestaurantOwnerAccess(id, request.enabled()));
     }
 
     @GetMapping("/restaurants")

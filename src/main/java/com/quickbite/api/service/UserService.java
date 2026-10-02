@@ -2,11 +2,13 @@ package com.quickbite.api.service;
 
 import com.quickbite.api.entity.User;
 import com.quickbite.api.entity.UserRole;
+import com.quickbite.api.exception.BadRequestException;
 import com.quickbite.api.exception.ConflictException;
 import com.quickbite.api.exception.ResourceNotFoundException;
 import com.quickbite.api.repository.UserRepository;
 import com.quickbite.api.service.command.ProfileUpdateCommand;
 import java.util.Locale;
+import java.nio.charset.StandardCharsets;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +27,9 @@ public class UserService {
 
     @Transactional
     public User register(String email, String rawPassword, String firstName, String lastName, String phone) {
+        if (rawPassword == null || rawPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new BadRequestException("Password must not exceed 72 UTF-8 bytes");
+        }
         String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
         if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new ConflictException("An account with this email already exists");
@@ -45,6 +50,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getById(Long id) {
+        return requireUser(id);
+    }
+
+    private User requireUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
@@ -57,7 +66,7 @@ public class UserService {
 
     @Transactional
     public User updateProfile(Long userId, ProfileUpdateCommand command) {
-        User user = getById(userId);
+        User user = requireUser(userId);
         String phone = command.phone() == null || command.phone().isBlank() ? null : command.phone().trim();
         if (phone != null && !phone.equalsIgnoreCase(user.getPhone())
                 && userRepository.existsByPhoneIgnoreCaseAndIdNot(phone, userId)) {
@@ -66,6 +75,16 @@ public class UserService {
         user.setFirstName(command.firstName().trim());
         user.setLastName(command.lastName().trim());
         user.setPhone(phone);
+        return user;
+    }
+
+    @Transactional
+    public User setRestaurantOwnerAccess(Long userId, boolean enabled) {
+        User user = requireUser(userId);
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new ConflictException("Administrator accounts cannot be changed through this operation");
+        }
+        user.setRole(enabled ? UserRole.RESTAURANT_OWNER : UserRole.CUSTOMER);
         return user;
     }
 

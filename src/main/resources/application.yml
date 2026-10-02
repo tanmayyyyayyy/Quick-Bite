@@ -21,3 +21,10 @@ server:
 quickbite:
   order:
     delivery-fee: ${DELIVERY_FEE:2.50}
+  security:
+    jwt:
+      secret: ${JWT_SECRET:}
+      access-token-ttl-ms: ${JWT_ACCESS_TOKEN_TTL_MS:900000}
+  bootstrap-admin:
+    email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:}
