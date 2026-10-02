@@ -21,6 +21,7 @@ import com.quickbite.api.repository.UserRepository;
 import com.quickbite.api.service.command.CreateOrderCommand;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,7 +83,9 @@ public class OrderService {
             if (!menuItem.isAvailable()) {
                 throw new UnprocessableEntityException("Menu item is no longer available: " + menuItem.getName());
             }
-            if (!menuItem.getRestaurant().getId().equals(restaurant.getId())) {
+                if (menuItem.getRestaurant() != restaurant
+                    && (menuItem.getRestaurant().getId() == null
+                        || !Objects.equals(menuItem.getRestaurant().getId(), restaurant.getId()))) {
                 throw new UnprocessableEntityException("A cart may only contain items from one restaurant");
             }
             subtotal = subtotal.add(menuItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));

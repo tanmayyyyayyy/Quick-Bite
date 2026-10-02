@@ -13,6 +13,7 @@ import com.quickbite.api.repository.MenuItemRepository;
 import com.quickbite.api.repository.UserRepository;
 import com.quickbite.api.service.command.AddCartItemCommand;
 import java.math.BigDecimal;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +58,7 @@ public class CartService {
 
         Cart cart = getOrCreate(userId);
         if (!cart.getItems().isEmpty() && cart.getItems().stream()
-                .anyMatch(item -> !item.getMenuItem().getRestaurant().getId().equals(menuItem.getRestaurant().getId()))) {
+            .anyMatch(item -> !sameRestaurant(item.getMenuItem(), menuItem))) {
             throw new ConflictException("A cart can contain items from only one restaurant");
         }
 
@@ -113,5 +114,14 @@ public class CartService {
         if (quantity < 1 || quantity > 99) {
             throw new BadRequestException("Quantity must be between 1 and 99");
         }
+    }
+
+    private static boolean sameRestaurant(MenuItem first, MenuItem second) {
+        if (first.getRestaurant() == second.getRestaurant()) {
+            return true;
+        }
+        Long firstId = first.getRestaurant().getId();
+        Long secondId = second.getRestaurant().getId();
+        return firstId != null && Objects.equals(firstId, secondId);
     }
 }
