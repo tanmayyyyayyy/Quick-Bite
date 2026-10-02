@@ -10,9 +10,10 @@ import com.quickbite.api.entity.OrderStatus;
 import com.quickbite.api.entity.Restaurant;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.entity.UserRole;
-import com.quickbite.api.exception.BadRequestException;
+import com.quickbite.api.exception.ConflictException;
 import com.quickbite.api.exception.ForbiddenException;
 import com.quickbite.api.exception.ResourceNotFoundException;
+import com.quickbite.api.exception.UnprocessableEntityException;
 import com.quickbite.api.repository.AddressRepository;
 import com.quickbite.api.repository.OrderRepository;
 import com.quickbite.api.repository.RestaurantRepository;
@@ -28,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderService {
+    private static final String ORDER_RESOURCE = "Order";
+
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
@@ -61,26 +64,26 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address", command.addressId()));
         Cart cart = cartService.getOrCreate(userId);
         if (cart.getItems().isEmpty()) {
-            throw new BadRequestException("Cannot create an order from an empty cart");
+            throw new UnprocessableEntityException("Cannot create an order from an empty cart");
         }
 
         CartItem firstItem = cart.getItems().getFirst();
         Restaurant restaurant = firstItem.getMenuItem().getRestaurant();
         if (!restaurant.isActive()) {
-            throw new BadRequestException("The restaurant is not accepting orders");
+            throw new UnprocessableEntityException("The restaurant is not accepting orders");
         }
 
         BigDecimal subtotal = BigDecimal.ZERO;
         for (CartItem cartItem : cart.getItems()) {
             MenuItem menuItem = cartItem.getMenuItem();
             if (cartItem.getQuantity() < 1 || cartItem.getQuantity() > 99) {
-                throw new BadRequestException("Cart contains an invalid quantity");
+                throw new UnprocessableEntityException("Cart contains an invalid quantity");
             }
             if (!menuItem.isAvailable()) {
-                throw new BadRequestException("Menu item is no longer available: " + menuItem.getName());
+                throw new UnprocessableEntityException("Menu item is no longer available: " + menuItem.getName());
             }
             if (!menuItem.getRestaurant().getId().equals(restaurant.getId())) {
-                throw new BadRequestException("A cart may only contain items from one restaurant");
+                throw new UnprocessableEntityException("A cart may only contain items from one restaurant");
             }
             subtotal = subtotal.add(menuItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
@@ -133,7 +136,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public CustomerOrder get(Long orderId, Long actorId, UserRole role) {
         CustomerOrder order = orderRepository.findDetailedById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(ORDER_RESOURCE, orderId));
         boolean allowed = role == UserRole.ADMIN
                 || order.getUser().getId().equals(actorId)
                 || (role == UserRole.RESTAURANT_OWNER && order.getRestaurant().getOwner().getId().equals(actorId));
@@ -146,13 +149,13 @@ public class OrderService {
     @Transactional
     public CustomerOrder changeStatus(Long orderId, Long actorId, UserRole role, OrderStatus nextStatus) {
         CustomerOrder order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(ORDER_RESOURCE, orderId));
         if (role != UserRole.ADMIN
                 && (role != UserRole.RESTAURANT_OWNER || !order.getRestaurant().getOwner().getId().equals(actorId))) {
             throw new ForbiddenException("Only the restaurant owner or an administrator may update order status");
         }
         if (!isAllowedTransition(order.getStatus(), nextStatus)) {
-            throw new BadRequestException("Invalid order status transition: " + order.getStatus() + " to " + nextStatus);
+            throw new ConflictException("Invalid order status transition: " + order.getStatus() + " to " + nextStatus);
         }
         order.setStatus(nextStatus);
         return order;
@@ -161,12 +164,12 @@ public class OrderService {
     @Transactional
     public CustomerOrder cancel(Long orderId, Long actorId, UserRole role) {
         CustomerOrder order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(ORDER_RESOURCE, orderId));
         if (role != UserRole.ADMIN && !order.getUser().getId().equals(actorId)) {
             throw new ForbiddenException("You may not cancel this order");
         }
         if (order.getStatus() != OrderStatus.PLACED) {
-            throw new BadRequestException("Only newly placed orders may be cancelled");
+            throw new ConflictException("Only newly placed orders may be cancelled");
         }
         order.setStatus(OrderStatus.CANCELLED);
         return order;

@@ -40,12 +40,16 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
             AuthenticationProvider authenticationProvider,
-            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ApiSecurityErrorHandler apiSecurityErrorHandler) throws Exception {
         return http
             // Bearer-token requests do not use cookie-backed browser sessions.
             .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
+            .exceptionHandling(errors -> errors
+                .authenticationEntryPoint(apiSecurityErrorHandler)
+                .accessDeniedHandler(apiSecurityErrorHandler))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
