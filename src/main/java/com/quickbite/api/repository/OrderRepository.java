@@ -34,6 +34,8 @@ public interface OrderRepository extends JpaRepository<CustomerOrder, Long> {
 
     long countByStatus(OrderStatus status);
 
+        boolean existsByAddressId(Long addressId);
+
         @Query(value = """
             select restaurant.id as restaurantId,
                    restaurant.name as restaurantName,

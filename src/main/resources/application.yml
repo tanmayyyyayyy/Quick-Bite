@@ -17,3 +17,7 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+quickbite:
+  order:
+    delivery-fee: ${DELIVERY_FEE:2.50}
