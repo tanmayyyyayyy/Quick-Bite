@@ -9,6 +9,7 @@ import com.quickbite.api.service.RestaurantService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.net.URI;
 import org.springframework.data.domain.Pageable;
@@ -44,9 +45,9 @@ public class RestaurantController {
 
     @GetMapping
     public PageResponse<RestaurantResponse> list(
-            @RequestParam(required = false) String cuisine,
+            @RequestParam(required = false) @Size(max = 80) String cuisine,
             @RequestParam(required = false) @DecimalMin("0.0") @DecimalMax("5.0") BigDecimal minimumRating,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @Size(max = 120) String search,
             @PageableDefault(size = 20, sort = "name") Pageable pageable) {
         return PageResponse.from(restaurantService.search(cuisine, minimumRating, search, pageable), apiMapper::toResponse);
     }

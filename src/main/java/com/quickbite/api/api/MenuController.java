@@ -7,22 +7,24 @@ import com.quickbite.api.api.dto.PageResponse;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.service.MenuService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 public class MenuController {
     private final MenuService menuService;
@@ -37,9 +39,9 @@ public class MenuController {
 
     @GetMapping("/api/restaurants/{restaurantId}/menu")
     public PageResponse<MenuItemResponse> list(@PathVariable Long restaurantId,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) Boolean available,
+            @RequestParam(required = false) @Size(max = 120) String search,
+            @RequestParam(required = false) @Size(max = 80) String category,
+            @RequestParam(defaultValue = "true") Boolean available,
             @PageableDefault(size = 30, sort = "name") Pageable pageable) {
         return PageResponse.from(menuService.search(restaurantId, category, search, available, pageable), apiMapper::toResponse);
     }
