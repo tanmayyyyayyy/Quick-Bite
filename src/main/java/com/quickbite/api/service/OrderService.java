@@ -132,7 +132,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public CustomerOrder get(Long orderId, Long actorId, UserRole role) {
-        CustomerOrder order = orderRepository.findById(orderId)
+        CustomerOrder order = orderRepository.findDetailedById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
         boolean allowed = role == UserRole.ADMIN
                 || order.getUser().getId().equals(actorId)

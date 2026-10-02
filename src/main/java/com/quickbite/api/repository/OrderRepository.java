@@ -3,13 +3,18 @@ package com.quickbite.api.repository;
 import com.quickbite.api.entity.CustomerOrder;
 import com.quickbite.api.entity.OrderStatus;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<CustomerOrder, Long> {
+        @EntityGraph(attributePaths = {"items", "items.menuItem", "user", "restaurant", "address"})
+        java.util.Optional<CustomerOrder> findDetailedById(Long id);
+
     Page<CustomerOrder> findByUserId(Long userId, Pageable pageable);
 
     Page<CustomerOrder> findByRestaurantId(Long restaurantId, Pageable pageable);
@@ -35,6 +40,10 @@ public interface OrderRepository extends JpaRepository<CustomerOrder, Long> {
     long countByStatus(OrderStatus status);
 
         boolean existsByAddressId(Long addressId);
+
+            @Query("select coalesce(sum(customerOrder.totalAmount), 0) from CustomerOrder customerOrder "
+                    + "where customerOrder.status <> :excludedStatus")
+            BigDecimal calculateRevenueExcludingStatus(@Param("excludedStatus") OrderStatus excludedStatus);
 
         @Query(value = """
             select restaurant.id as restaurantId,

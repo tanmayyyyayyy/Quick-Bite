@@ -41,6 +41,11 @@ public class RestaurantService {
         return restaurantRepository.findByOwnerId(ownerId, pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Page<Restaurant> getAll(Pageable pageable) {
+        return restaurantRepository.findAll(pageable);
+    }
+
     @Transactional
     public Restaurant create(Long actorId, UserRole actorRole, RestaurantCommand command) {
         requireOwnerRole(actorRole);
