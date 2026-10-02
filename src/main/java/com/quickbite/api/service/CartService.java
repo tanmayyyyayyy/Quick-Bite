@@ -37,6 +37,10 @@ public class CartService {
 
     @Transactional
     public Cart getOrCreate(Long userId) {
+        return findOrCreate(userId);
+    }
+
+    private Cart findOrCreate(Long userId) {
         return cartRepository.findWithItemsByUserId(userId).orElseGet(() -> {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("User", userId));
@@ -56,7 +60,7 @@ public class CartService {
             throw new BadRequestException("The restaurant is not accepting orders");
         }
 
-        Cart cart = getOrCreate(userId);
+        Cart cart = findOrCreate(userId);
         if (!cart.getItems().isEmpty() && cart.getItems().stream()
             .anyMatch(item -> !sameRestaurant(item.getMenuItem(), menuItem))) {
             throw new ConflictException("A cart can contain items from only one restaurant");

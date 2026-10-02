@@ -60,8 +60,8 @@ class MenuServiceTest {
         restaurant.setOwner(owner);
         when(restaurantRepository.findById(3L)).thenReturn(Optional.of(restaurant));
 
-        assertThatThrownBy(() -> menuService.create(3L, 8L, UserRole.CUSTOMER,
-                new MenuItemCommand("Veg bowl", null, "Lunch", BigDecimal.TEN, true)))
+        MenuItemCommand command = new MenuItemCommand("Veg bowl", null, "Lunch", BigDecimal.TEN, true);
+        assertThatThrownBy(() -> menuService.create(3L, 8L, UserRole.CUSTOMER, command))
                 .isInstanceOf(ForbiddenException.class);
     }
 }

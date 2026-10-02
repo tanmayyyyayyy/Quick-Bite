@@ -7,6 +7,8 @@ import com.quickbite.api.api.dto.UpdateCartItemRequest;
 import com.quickbite.api.entity.Cart;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.service.CartService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cart")
 @PreAuthorize("hasRole('CUSTOMER')")
+@Tag(name = "Cart")
+@SecurityRequirement(name = "bearerAuth")
 public class CartController {
     private final CartService cartService;
     private final ActorResolver actorResolver;

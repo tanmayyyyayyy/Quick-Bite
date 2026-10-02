@@ -12,6 +12,8 @@ import com.quickbite.api.service.AdminService;
 import com.quickbite.api.service.OrderService;
 import com.quickbite.api.service.RestaurantService;
 import com.quickbite.api.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Administration")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminController {
     private final UserService userService;
     private final RestaurantService restaurantService;

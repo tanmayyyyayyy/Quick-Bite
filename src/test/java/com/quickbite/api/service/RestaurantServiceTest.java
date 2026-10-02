@@ -1,7 +1,6 @@
 package com.quickbite.api.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +34,8 @@ class RestaurantServiceTest {
 
     @Test
     void rejectsCustomerCreatingRestaurant() {
-        assertThatThrownBy(() -> restaurantService.create(3L, UserRole.CUSTOMER, command()))
+        RestaurantCommand request = command();
+        assertThatThrownBy(() -> restaurantService.create(3L, UserRole.CUSTOMER, request))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -47,7 +47,8 @@ class RestaurantServiceTest {
         restaurant.setOwner(owner);
         when(restaurantRepository.findById(4L)).thenReturn(Optional.of(restaurant));
 
-        assertThatThrownBy(() -> restaurantService.update(4L, 3L, UserRole.RESTAURANT_OWNER, command()))
+        RestaurantCommand request = command();
+        assertThatThrownBy(() -> restaurantService.update(4L, 3L, UserRole.RESTAURANT_OWNER, request))
                 .isInstanceOf(ForbiddenException.class);
     }
 

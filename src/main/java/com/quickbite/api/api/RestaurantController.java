@@ -6,6 +6,8 @@ import com.quickbite.api.api.dto.RestaurantRequest;
 import com.quickbite.api.api.dto.RestaurantResponse;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.service.RestaurantService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/restaurants")
+@Tag(name = "Restaurants")
 public class RestaurantController {
     private final RestaurantService restaurantService;
     private final ActorResolver actorResolver;
@@ -58,6 +61,7 @@ public class RestaurantController {
     }
 
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     public ResponseEntity<RestaurantResponse> create(@AuthenticationPrincipal UserDetails principal,
             @Valid @RequestBody RestaurantRequest request) {
@@ -68,6 +72,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     public RestaurantResponse update(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal,
             @Valid @RequestBody RestaurantRequest request) {
@@ -76,6 +81,7 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('RESTAURANT_OWNER', 'ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal) {
         User actor = actorResolver.requireUser(principal);

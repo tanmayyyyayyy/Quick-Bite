@@ -5,6 +5,8 @@ import com.quickbite.api.api.dto.ProfileUpdateRequest;
 import com.quickbite.api.api.dto.UserResponse;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users/me")
+@Tag(name = "Users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     private final ActorResolver actorResolver;
     private final UserService userService;

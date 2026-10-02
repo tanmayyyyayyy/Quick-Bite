@@ -5,6 +5,8 @@ import com.quickbite.api.api.dto.AddressResponse;
 import com.quickbite.api.api.dto.ApiMapper;
 import com.quickbite.api.entity.User;
 import com.quickbite.api.service.AddressService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/addresses")
 @PreAuthorize("hasRole('CUSTOMER')")
+@Tag(name = "Addresses")
+@SecurityRequirement(name = "bearerAuth")
 public class AddressController {
     private final AddressService addressService;
     private final ActorResolver actorResolver;

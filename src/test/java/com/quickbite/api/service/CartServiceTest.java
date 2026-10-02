@@ -82,7 +82,8 @@ class CartServiceTest {
         when(menuItemRepository.findById(16L)).thenReturn(Optional.of(requestedItem));
         when(cartRepository.findWithItemsByUserId(5L)).thenReturn(Optional.of(cart));
 
-        assertThatThrownBy(() -> cartService.addItem(5L, new AddCartItemCommand(16L, 1)))
+        AddCartItemCommand command = new AddCartItemCommand(16L, 1);
+        assertThatThrownBy(() -> cartService.addItem(5L, command))
                 .isInstanceOf(ConflictException.class);
 
         verify(cartRepository, never()).save(any(Cart.class));

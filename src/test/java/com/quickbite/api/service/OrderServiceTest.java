@@ -91,7 +91,8 @@ class OrderServiceTest {
         when(addressRepository.findByIdAndUserId(10L, 5L)).thenReturn(Optional.of(mock(Address.class)));
         when(cartService.getOrCreate(5L)).thenReturn(new Cart());
 
-        assertThatThrownBy(() -> orderService.create(5L, new CreateOrderCommand(10L)))
+        CreateOrderCommand command = new CreateOrderCommand(10L);
+        assertThatThrownBy(() -> orderService.create(5L, command))
                 .isInstanceOf(UnprocessableEntityException.class);
 
         verify(orderRepository, never()).save(any(CustomerOrder.class));

@@ -7,6 +7,7 @@ import com.quickbite.api.api.dto.RegisterRequest;
 import com.quickbite.api.api.dto.UserResponse;
 import com.quickbite.api.security.JwtService;
 import com.quickbite.api.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication")
 public class AuthController {
     private final UserService userService;
     private final ApiMapper apiMapper;

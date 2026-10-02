@@ -9,10 +9,11 @@ import com.quickbite.api.api.dto.PageResponse;
 import com.quickbite.api.entity.CustomerOrder;
 import com.quickbite.api.entity.OrderStatus;
 import com.quickbite.api.entity.User;
-import com.quickbite.api.entity.UserRole;
 import com.quickbite.api.exception.BadRequestException;
 import com.quickbite.api.service.OrderService;
 import com.quickbite.api.service.command.CreateOrderCommand;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/orders")
+@Tag(name = "Orders")
+@SecurityRequirement(name = "bearerAuth")
 public class OrderController {
     private final OrderService orderService;
     private final ActorResolver actorResolver;
